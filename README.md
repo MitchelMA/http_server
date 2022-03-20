@@ -15,7 +15,7 @@ Hierin staat het volgende:
 - host: dit is het address van de server (standaard localhost)
 - port: de port waar de server open op is (standaad op 80)
 - base-path: de path waar de html-pagina's in staan (path is relatief aan de [Server](./Server/) directory)
-- snippet-path: path waar alle [snippet-bestanden](##Snippets) staan (url is relatief aan de [Server](./Server/) directory)
+- snippet-path: path waar alle [snippet-bestanden](#Snippets) staan (url is relatief aan de [Server](./Server/) directory)
 
 
 ## Snippets
@@ -31,6 +31,6 @@ maar dit niet:
 ***
 
 Het aanmaken van een snippet bestand is simpel:  
-eerst moet je zorgen dat hij in de correcte [snippet-path](##Config) staan.  
+eerst moet je zorgen dat hij in de correcte [snippet-path](#Config) staan.  
 De naam van een snippet bestand begint met een underscore: \_ ; dan volgt de gegeven naam en als laatst logischerwijs de extensie ".html".  
 Als je refereert naar een snippet, dan wordt dat stukje vervangen met **alles** wat er in het snippet-bestand staat. Het is dus niet handig als er een html-openingstag in staat, of head en body.
