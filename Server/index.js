@@ -8,7 +8,7 @@ const { exit } = require("process");
 //#endregion
 
 //#region local imports
-const { getHeader, getSnippets } = require("./helper.js");
+const { getHeader, replaceSnippets } = require("./helper.js");
 //#endregion
 
 //#region constants
@@ -54,23 +54,8 @@ const server = http.createServer((req, res) => {
         .readFileSync(path.join(BASE, urlPathName, INDEX))
         .toString();
       // check if if there are snippets
-      let snippets = getSnippets(dirin);
-      if (snippets !== null) {
-        for (let i in snippets) {
-          let snip = snippets[i].split(" ")[1];
-          // open the snippet file
-          try {
-            const snipFile = fs
-              .readFileSync(path.join(SNIP, `_${snip}.html`))
-              .toString();
-            dirin = dirin.replace(snippets[i], snipFile);
-          } catch (err) {
-            console.error(
-              `ERR: snippet \"${path.join(SNIP, `_${snip}.html`)}\" not found`
-            );
-          }
-        }
-      }
+      dirin = replaceSnippets(dirin, SNIP);
+
       res.setHeader("Content-Type", "text/html");
       res.writeHead(200);
       res.end(dirin);
@@ -86,25 +71,8 @@ const server = http.createServer((req, res) => {
       let file = fs.readFileSync(path.join(BASE, urlPathName));
       // check if the extension is html or htm
       if (headerType[0] === ".html" || headerType[0] === ".htm") {
-        // convert the file to a string:
-        file = file.toString();
-        let snippets = getSnippets(file);
-        if (snippets !== null) {
-          for (let i in snippets) {
-            let snip = snippets[i].split(" ")[1];
-            // open the snippet file
-            try {
-              const snipFile = fs
-                .readFileSync(path.join(SNIP, `_${snip}.html`))
-                .toString();
-              file = file.replace(snippets[i], snipFile);
-            } catch (err) {
-              console.error(
-                `ERR: snippet \"${path.join(SNIP, `_${snip}.html`)}\" not found`
-              );
-            }
-          }
-        }
+        // replace the snippets in the file
+        file = replaceSnippets(file.toString(), SNIP);
       }
       res.setHeader("Content-Type", headerType[1]);
       res.writeHead(200);

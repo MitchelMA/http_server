@@ -1,3 +1,7 @@
+const fs = require("fs");
+const { get } = require("http");
+const path = require("path");
+
 // returns an array:
 // 0: extension
 // 1: MIME-type
@@ -93,8 +97,68 @@ const MIME_TYPES = {
 };
 
 // to get the snippet variables in the html
-exports.getSnippets = function (filestring) {
-  let expression = /%s\s(\w+)\s%s/g;
+getSnippets = function (filestring) {
+  let expression = /%s\s([\w\/]+)\s%s/g;
   let snips = filestring.match(expression);
+
   return snips;
+};
+
+// to convert the snippets
+// this method returns the file with the replaced text
+/**
+ *
+ * @param {string} file the file of which the snippets need to be replaced
+ */
+exports.replaceSnippets = function (fileString, basePath) {
+  if (!(typeof fileString === "string")) {
+    throw new Error("Filestring is not a string");
+  }
+  if (basePath === null) {
+    throw new Error("No base-path was given");
+  }
+
+  // get the snippets
+  let snips;
+  try {
+    snips = [...getSnippets(fileString)];
+  } catch (err) {
+    // early return if there are no snippets present in the file
+    return fileString;
+  }
+
+  let snipslocations = [];
+  for (let i in snips) {
+    snipslocations.push(snips[i].split(" ")[1]);
+  }
+
+  for (let i in snipslocations) {
+    // check if "/" is in the snippet as a path-divider
+    if (snipslocations[i].includes("/")) {
+      // if this is the case, only adjust the last
+      snipslocations[i] = snipslocations[i].split("/");
+      snipslocations[i][snipslocations[i].length - 1] = `_${
+        snipslocations[i][snipslocations[i].length - 1]
+      }`;
+      snipslocations[i] = snipslocations[i].join("/");
+    } else {
+      snipslocations[i] = `_${snipslocations[i]}`;
+    }
+
+    // try to open the snippet file
+    try {
+      const snipFile = fs
+        .readFileSync(path.join(basePath, `${snipslocations[i]}.html`))
+        .toString();
+      fileString = fileString.replace(snips[i], snipFile);
+    } catch (err) {
+      console.error(
+        `ERR: snippet \"${path.join(
+          basePath,
+          `${snipslocations[i]}.html`
+        )}\" not found`
+      );
+    }
+  }
+  return fileString;
 };
